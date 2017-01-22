@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers;
+namespace rabbit\Providers;
 
 use Illuminate\Support\ServiceProvider;
 

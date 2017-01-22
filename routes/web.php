@@ -12,5 +12,12 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    //$centroid = json_encode([-25.363 , 125.552]);
+    // $lat = '-25.363';
+    // $long = '100';
+	return view('welcome');
 });
+
+// Route::get('twitterUserTimeLine', 'TwitterController@twitterUserTimeLine');
+// Route::post('searchTweet', ['as'=>'search.tweet','uses'=>'TwitterController@searchTweet']);
+// Route::resource('tweet', 'TwitterController');

@@ -166,17 +166,19 @@ return [
         /*
          * Package Service Providers...
          */
-
+        'Thujohn\Twitter\TwitterServiceProvider',
+        //'Abraham\TwitterOAuth\TwitterOAuth',
         //
+
 
         /*
          * Application Service Providers...
          */
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
+        rabbit\Providers\AppServiceProvider::class,
+        rabbit\Providers\AuthServiceProvider::class,
+        // rabbit\Providers\BroadcastServiceProvider::class,
+        rabbit\Providers\EventServiceProvider::class,
+        rabbit\Providers\RouteServiceProvider::class,
 
     ],
 
@@ -225,6 +227,9 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
+
+        'Twitter' => 'Thujohn\Twitter\Facades\Twitter',
+        'TwitterOAuth' => 'Abraham\TwitterOAuth\TwitterOAuth',
 
     ],
 
