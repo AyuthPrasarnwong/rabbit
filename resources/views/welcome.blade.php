@@ -49,6 +49,7 @@
     <script>
         var geocoder;
         var map;
+        var markers = [];
         // console.log('lat = ' + lat);
         // console.log('long = ' + long);
         function initMap() {
@@ -66,24 +67,27 @@
                 sidediv.innerHTML = text;
             }
 
+
             document.getElementById('submit').addEventListener('click', function() {
                 var address = document.getElementById('address').value;
                 geocoder.geocode( { 'address': address}, function(results, status) {
                     if (status == 'OK') {
                         $( '#address' ).val('');
+                 
                         var text = 'Tweets about ' + results[0].formatted_address;
                         showInContentWindow(text);
-                        map.setCenter(results[0].geometry.location);
+                        //map.setCenter(results[0].geometry.location);
                         var param = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() };
 
                         $.getJSON( "/api/tweets", param, function( dataTweets ) {   
-                            var i = 0; 
+                            
                             var bound = new google.maps.LatLngBounds();
-
+                            deleteMarkers();
                           
-                            console.log(dataTweets);
+                            //console.log(dataTweets);
                             dataTweets.forEach(function( tweet, index ) { 
                                 if(tweet.coordinates !== null) {
+
                                     //console.log(tweet.geo.coordinates[1]);
                                     console.log(tweet);
                                     //alert('Display only the tweets that contain coordinate data');
@@ -115,24 +119,28 @@
                                         infowindow.open(map, marker);
                                     });
                                     bound.extend(marker.getPosition());
-                                    i++;
+                                    markers.push(marker);
+                                    
                                 } else {
+                                    // tweet.coordinates === null
                                 }
                             });
-                            if(i > 0) {
+                            if(markers.length > 0) {
+                                
                                 map.setZoom(8);
                                 map.setCenter(bound.getCenter());
                                 console.log("bound ", bound)
-
                                 console.log("bound center", bound.getCenter())
+
                                 swal({
                                   title: "Success!",
-                                  text: 'There are ' + i + ' tweets that contain coordinate data',
+                                  text: 'There are ' + markers.length + ' tweets that contain coordinate data',
                                   type: "success",
                                   confirmButtonText: "OK"
                                 });
                                 //alert('There are ' + i + ' tweets that contain coordinate data');
                             } else {
+                                
                                 swal({
                                   title: "Error!",
                                   text: 'Each tweet do not contain coordinate data',
@@ -154,6 +162,26 @@
                 });
             });
         }
+        function setMapOnAll(map) {
+            for (var i = 0; i < markers.length; i++) {
+                markers[i].setMap(map);
+            }
+        }
+        // Removes the markers from the map, but keeps them in the array.
+        function clearMarkers() {
+            setMapOnAll(null);
+        }
+        // Shows any markers currently in the array.
+        function showMarkers() {
+            setMapOnAll(map);
+        }
+
+        // Deletes all markers in the array by removing references to them.
+        function deleteMarkers() {
+            clearMarkers();
+            markers = [];
+        }
+
     </script>
  
     <script async defer
