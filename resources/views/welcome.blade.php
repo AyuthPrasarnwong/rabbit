@@ -11,13 +11,19 @@
                 padding: 0;
             }
             #map { height: 95%; }
-            #content-window {
+            #floating-panel {
                 position: absolute;
                 z-index: 10000;
                 text-align: center;
-                width: 100%;  
+                width: 50%;
+                top: 5%;
+                left: 25%;
+                padding: 5px;
+                background-color: #fff;
+                border: 1px solid #999;
             }
-            #text-show {
+            #city-text {
+                margin: auto;
                 color: red; 
                 text-transform: uppercase;
                 text-shadow: 3px 2px blue;
@@ -27,7 +33,7 @@
 
     <body>
 
-        <div id="content-window"><h2 id="text-show"></h2></div>
+        <div id="floating-panel"><h2 id="city-text"></h2></div>
         <div id="map"></div>
         <div class="form-group" style="width: 100%; height: 5%;">
             <div class="input-group">
@@ -50,6 +56,7 @@
         var geocoder;
         var map;
         var markers = [];
+        $( '#floating-panel' ).hide();
         // console.log('lat = ' + lat);
         // console.log('long = ' + long);
         function initMap() {
@@ -62,10 +69,6 @@
             });
             geocoder = new google.maps.Geocoder();
 
-            function showInContentWindow(text) {
-                var sidediv = document.getElementById('text-show');
-                sidediv.innerHTML = text;
-            }
 
 
             document.getElementById('submit').addEventListener('click', function() {
@@ -75,7 +78,7 @@
                         $( '#address' ).val('');
                  
                         var text = 'Tweets about ' + results[0].formatted_address;
-                        showInContentWindow(text);
+                       
                         //map.setCenter(results[0].geometry.location);
                         var param = { lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() };
 
@@ -138,6 +141,8 @@
                                   type: "success",
                                   confirmButtonText: "OK"
                                 });
+
+                                showCityText(text);
                                 //alert('There are ' + i + ' tweets that contain coordinate data');
                             } else {
                                 
@@ -162,6 +167,14 @@
                 });
             });
         }
+
+        function showCityText(text) {
+            $( '#floating-panel' ).show();
+            $( '#city-text' ).text(text);
+            // var sidediv = document.getElementById('text-show');
+            // sidediv.innerHTML = text;
+        }
+
         function setMapOnAll(map) {
             for (var i = 0; i < markers.length; i++) {
                 markers[i].setMap(map);
