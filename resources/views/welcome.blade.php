@@ -10,7 +10,7 @@
                 margin: 0;
                 padding: 0;
             }
-            #map { height: 95%; }
+        
             #floating-panel {
                 position: absolute;
                 z-index: 10000;
@@ -34,31 +34,63 @@
     <body>
 
         <div id="floating-panel"><h2 id="city-text"></h2></div>
-        <div id="map"></div>
-        <div class="form-group" style="width: 100%; height: 5%;">
+        <div id="map" style="position:fix; width: 100%; height: 95%;"></div>
+        <div id="form" class="form-group" style="width: 100%; height: 5%;">
             <div class="input-group">
-                <input id="address" type="text" name="city_name" class="form-control" placeholder="City Name" required>
-                <input id="fullname" type="hidden" value="">
+                <input id="address" type="text" class="form-control" placeholder="City Name">
+                <!-- <input id="fullname" type="hidden" value=""> -->
                     <span class="input-group-btn">
-                        <button id="submit" class="btn btn-primary" value="Geocode"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Search</button>
-                      
+                        <button id="submit" class="btn btn-primary" value="Geocode">
+                            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>Search
+                        </button>
                     </span>
             </div>
-        </div>
+        </div> 
         
        
     </body>
 
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.js"></script> -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="{{ asset('js/sweetalert.min.js') }}"></script>
+    <!-- script async defer -->
+    <script 
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBr9LJNSJr8-i35_sStZslzRgi1nherrXU">
+    </script>
     <script>
         var geocoder;
         var map;
         var markers = [];
-        $( '#floating-panel' ).hide();
-        // console.log('lat = ' + lat);
-        // console.log('long = ' + long);
+        initMap();
+        
+        $( document ).ready(function() {
+            // Handler for .ready() called.
+            $( '#floating-panel' ).hide();
+            $( '#address' ).keydown(function(event) {
+
+                if ( event.which == 13 ) {
+                    $( '#submit' ).click();
+                    
+                }
+            });
+        });
+        // $( '#form' ).validate({
+        //     rules: {
+        //         city_name: {
+        //             required: true,
+        //             // Using the normalizer to trim the value of the element
+        //             // before validating it.
+        //             //
+        //             // The value of `this` inside the `normalizer` is the corresponding
+        //             // DOMElement. In this example, `this` references the `username` element.
+        //             normalizer: function(value) {
+        //                 return $.trim(value);
+        //             }
+        //         }
+        //     }
+        // });
         function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 3,
@@ -68,11 +100,12 @@
                 }
             });
             geocoder = new google.maps.Geocoder();
+            search(map, geocoder);
+        }
 
-
-
+        function search(map, geocoder) {
             document.getElementById('submit').addEventListener('click', function() {
-                var address = document.getElementById('address').value;
+                var address = $( '#address' ).val();
                 geocoder.geocode( { 'address': address}, function(results, status) {
                     if (status == 'OK') {
                         $( '#address' ).val('');
@@ -86,24 +119,12 @@
                             
                             var bound = new google.maps.LatLngBounds();
                             deleteMarkers();
-                          
-                            //console.log(dataTweets);
+                            console.log('dataTweets', dataTweets);
+
                             dataTweets.forEach(function( tweet, index ) { 
                                 if(tweet.coordinates !== null) {
-
-                                    //console.log(tweet.geo.coordinates[1]);
-                                    console.log(tweet);
                                     //alert('Display only the tweets that contain coordinate data');
-                                    var marker = new google.maps.Marker({
-                                        position: {
-                                            lat: tweet.coordinates.coordinates[1], 
-                                            lng: tweet.coordinates.coordinates[0]
-                                        },
-                                        icon: tweet.user.profile_image_url,
-                                        map: map,
-                                        animation: google.maps.Animation.DROP,
-                                        title: tweet.place.full_name
-                                    });
+                                    var marker = createMarker(map, tweet, index);
 
                                     var contentString = '<div id="content">' +
                                         '<div id="siteNotice">' +
@@ -123,17 +144,19 @@
                                     });
                                     bound.extend(marker.getPosition());
                                     markers.push(marker);
+                                    // infowindow.open(map, marker);
                                     
                                 } else {
                                     // tweet.coordinates === null
                                 }
                             });
+
                             if(markers.length > 0) {
                                 
                                 map.setZoom(8);
                                 map.setCenter(bound.getCenter());
-                                console.log("bound ", bound)
-                                console.log("bound center", bound.getCenter())
+                                //console.log("bound ", bound)
+                                //console.log("bound center", bound.getCenter())
 
                                 swal({
                                   title: "Success!",
@@ -143,7 +166,8 @@
                                 });
 
                                 showCityText(text);
-                                //alert('There are ' + i + ' tweets that contain coordinate data');
+
+
                             } else {
                                 
                                 swal({
@@ -155,6 +179,7 @@
                                 //alert('All tweets do not contain coordinate data');
                             }  
                         }); 
+                        
                     } else {
                         swal({
                           title: "Error!",
@@ -165,6 +190,20 @@
                         //alert('Geocode was not successful for the following reason: ' + status);
                     }
                 });
+            });
+        }
+
+        function createMarker(map, tweet, index) {
+            return new google.maps.Marker({
+                position: {
+                    lat: tweet.coordinates.coordinates[1], 
+                    lng: tweet.coordinates.coordinates[0]
+                },
+                icon: tweet.user.profile_image_url,
+                map: map,
+                animation: google.maps.Animation.DROP,
+                title: tweet.place.full_name,
+                zIndex: index
             });
         }
 
@@ -195,9 +234,7 @@
             markers = [];
         }
 
-    </script>
- 
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBr9LJNSJr8-i35_sStZslzRgi1nherrXU&callback=initMap">
+    
+
     </script>
 </html>
